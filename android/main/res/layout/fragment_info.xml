@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="left"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/fragment_info_padding_top">
+
+        <TextView
+            android:layout_width="@dimen/fragment_info_leftSize"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="Address"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="Los Angeles, CA 90007"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/fragment_info_padding_top">
+
+        <TextView
+            android:layout_width="@dimen/fragment_info_leftSize"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="Phone Number"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/phone_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="(213)740-2311"
+            android:textSize="15sp"
+            android:autoLink="phone"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/fragment_info_padding_top">
+
+        <TextView
+            android:layout_width="@dimen/fragment_info_leftSize"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="Price Level"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/price_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="$$"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/fragment_info_padding_top">
+
+        <TextView
+            android:layout_width="@dimen/fragment_info_leftSize"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="Rating"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <RatingBar
+            android:id="@+id/rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            style="?android:attr/ratingBarStyleSmall"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/fragment_info_padding_top">
+
+        <TextView
+            android:layout_width="@dimen/fragment_info_leftSize"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="Google Page"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/google_page"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="https://maps.google.com/?cid=12290422733005103812"
+            android:textSize="15sp"
+            android:autoLink="web"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/fragment_info_padding_top">
+
+        <TextView
+            android:layout_width="@dimen/fragment_info_leftSize"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="Website"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/website"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:text="http://use.edu/"
+            android:textSize="15sp"
+            android:autoLink="web"/>
+    </LinearLayout>
+</LinearLayout>
