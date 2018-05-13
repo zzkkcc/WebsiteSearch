@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="text/html" charset="UTF-8">
+    <title>TravelSearch</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!--<link rel="stylesheet" href="assets/css/bootstrap-responsive.css">-->
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.3/angular.min.js"></script>
+    <script src="https://code.angularjs.org/1.6.3/angular-animate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+    <script src="https://cdn.bootcss.com/angular.js/1.5.0-beta.0/angular-sanitize.min.js"></script>
+    <script type="text/javascript" async src="https://platform.twitter.com/widgets.js"></script>
+    <script src="script.js"></script>
+    <!--<script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMKArXNq_QKMxRX_CcJ2iqBPPpPXRx8DU&libraries=places&callback=initAutocomplete">
+    </script>-->
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBjXLw8SFji0-sDw9Vz2uOSdevrQm69KuQ&libraries=places&callback=initAutocomplete">
+    </script>
+</head>
+<body>
+<div ng-app="travel" ng-controller="goSearch">
+    <div>
+        <div>
+            <form name="searchForm" class="container search card bg-light" ng-submit="goSearch()">
+                <div class="text-center">
+                    <h5>Travel and Entertainment Search</h5>
+                </div>
+                <div class="form-group row">
+                    <label class="col-lg-2">Keyword*</label>
+                    <div class="col-lg-7">
+                        <input id="autocomplete" name="keyword" type="text" class="form-control" onFocus="geolocate()" ng-model="keyword" required>
+                        <span style="color:red" ng-show="searchForm.keyword.$dirty && searchForm.keyword.$invalid">
+                            <span ng-show="searchForm.keyword.$error.required">Please Enter Keyword</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-lg-2 col-sm-2 control-label" >Category</label>
+                    <div class="col-lg-4 col-xs-7">
+                        <select class="form-control" ng-init="category=categories[0].display" ng-model="category">
+                            <option ng-repeat="x in categories" value="{{x.search}}">{{x.display}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-lg-2 col-sm-2 control-label">Distance(miles)</label>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="distance">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-lg-2 col-xs-2 control-label">from*</label>
+                    <div class="col-lg-7">
+                        <input type="radio" ng-model="location" ng-checked="selectedLoc"> Current location.
+                        <br>
+                        <input type="radio" ng-model="location" value="other"> Other, Please Specify:
+                        <div>
+                            <input type="text" name="place" class="form-control" ng-model="place" ng-disabled="location != 'other'" required>
+                            <span style="color:red" ng-show="searchForm.place.$dirty && searchForm.place.$invalid">
+                                <span ng-show="location == 'other' && searchForm.place.$error.required">Please enter a location.</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row col-lg-10">
+                    <button type="submit" class="btn btn-primary" ng-disabled="searchForm.keyword.$invalid || (searchForm.place.$invalid && location == 'other')">
+                        <span class="glyphicon glyphicon-search"></span>Search
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="clear()"><span>Clear</span></button>
+                </div>
+            </form>
+        </div><br>
+        <div style="text-align: center">
+            <button type="button" class="btn btn-primary" ng-click="showResult()"><span>Results</span></button>
+            <button type="button" class="btn btn-default" ng-click="showFavorite()"><span>Favorites</span></button>
+        </div>
+    </div>
+    <div class="container" ng-show="resultTab">
+        <div ng-if="resultStat == 404" class="alert alert-danger" role="alert">
+            Failed to get search results.
+        </div>
+        <div ng-if="resultStat != 404 && data.length == 0" class="alert alert-warning" role="alert">
+            No Results Found!
+        </div>
+        <div ng-if="data.length > 0">
+            <button class="btn btn-default float-right" ng-disabled="curDetail == -1" ng-click="detail(curDetail, curPlaceId, data[curDetail].name)">
+                <span class="glyphicon glyphicon-chevron-right"></span>Details
+            </button>
+            <table class="table table-hover">
+                <tr>
+                    <th>#</th>
+                    <th>Category</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Favorite</th>
+                    <th>Details</th>
+                </tr>
+                <tr ng-repeat="x in data" ng-class="{'alert-warning':curPlaceId==data[$index].place_id}">
+                    <td width="4%">{{$index + 1}}</td>
+                    <td width="10%"><img src="{{x.icon}}" height='30' width='30'></td>
+                    <td width="33%">{{x.name}}</td>
+                    <td width="33%">{{data[$index].vicinity}}</td>
+                    <td width="10%">
+                        <button type="button" class="btn btn-default" ng-click="deleteFavorite(x.place_id)"
+                                 ng-show="checkFavorite(x.place_id)">
+                        <span class="glyphicon glyphicon-star" style="color:#FFCC00;"></span>
+                        </button>
+                        <button type="button" class="btn btn-default" ng-show="!checkFavorite(x.place_id)"
+                                ng-click="saveFavorite(x.icon, x.name, x.vicinity, x.place_id)">
+                            <span class="glyphicon glyphicon-star glyphicon-star-empty"></span>
+                        </button>
+                    </td>
+                    <td width="10%">
+                        <button class="btn btn-default" ng-click="detail($index, data[$index].place_id, data[$index].name)">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </button>
+                    </td>
+                </tr>
+            </table>
+            <div class="pager" style="text-align: center">
+                <button type="button" class="btn btn-default" ng-show="offset != 0" ng-click="prev()"><span>Previous</span></button>
+                <button type="button" class="btn btn-default" ng-show="!(pageToken == undefined && offset + 20 >= resultData.length)" ng-click="next()">
+                    <span>Next</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="container" ng-show="favoriteTab">
+        <div ng-if="favoriteData.length == 0">
+            <br><br><br><br><br><br>
+            <div class="alert alert-warning" role="alert">
+                No Results
+            </div>
+        </div>
+        <div ng-if="favoriteData.length > 0">
+            <button class="btn btn-default pull-right" ng-disabled="curDetail == -1" ng-click="detail(curDetail, data[curDetail].place_id, data[curDetail].name)">
+                <span class="glyphicon glyphicon-chevron-right"></span>Details
+            </button>
+            <table class="table table-hover">
+                <tr>
+                    <th>#</th>
+                    <th>Category</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Favorite</th>
+                    <th>Details</th>
+                </tr>
+                <tr ng-repeat="x in favoriteData">
+                    <td width="4%">{{$index + 1}}</td>
+                    <td width="10%"><img src="{{x[0]}}" height='30' width='30'></td>
+                    <td width="33%">{{x[1]}}</td>
+                    <td width="33%">{{x[2]}}</td>
+                    <td width="10%">
+                        <button type="button" class="btn btn-default" ng-click="deleteFavorite(x[3])"
+                                ng-show="checkFavorite(x[3])">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button></td>
+                    <td width="10%"><button type="button" class="btn btn-default" ng-click="detail($index, x[3], x[2])">
+                        <span class="glyphicon glyphicon-chevron-right"></span></button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="container show-hide" ng-show="detailTab">
+        <div class="text-center h4">{{detailData.name}}</div>
+        <div>
+            <button type="button" class="btn btn-default" ng-click="goBack()">
+                <span class="glyphicon glyphicon-chevron-left"></span>List
+            </button>
+            <a href="{{twitterhref()}}">
+                <img class="float-right" src="Twitter.png" style="height: 33px; width: 38px">
+            </a>
+            <button type="button" class="btn btn-default float-right" ng-show="!checkFavorite(detailData.place_id)"
+                    ng-click="saveFavorite(detailData.icon, detailData.name, detailData.vicinity, detailData.place_id)">
+                <span class="glyphicon glyphicon-star glyphicon-star-empty"></span>
+            </button>
+            <button type="button" class="btn btn-default float-right" ng-click="deleteFavorite(detailData.place_id)"
+                    ng-show="checkFavorite(detailData.place_id)">
+                <span class="glyphicon glyphicon-star" style="color:#FFCC00;"></span>
+            </button>
+        </div>
+        <div>
+        <ul class="nav nav-tabs justify-content-end">
+            <li class="nav-item"><a class="nav-link active" href="#info" data-toggle="tab">Info</a></li>
+            <li class="nav-item"><a class="nav-link" href="#photos" data-toggle="tab">Photos</a></li>
+            <li class="nav-item"><a class="nav-link" href="#map" data-toggle="tab">Map</a></li>
+            <li class="nav-item"><a class="nav-link" href="#review" data-toggle="tab">Review</a></li>
+        </ul>
+        </div>
+        <br>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="info">
+                <table class="table table-striped">
+                    <tr><td>Address</td><td>{{detailData.formatted_address}}</td></tr>
+                    <tr><td>Phone Number</td><td>{{detailData.international_phone_number}}</td></tr>
+                    <tr><td>Price Level</td><td>{{'$'.repeat(detailData.price_level)}}</td></tr>
+                    <tr><td>Rating</td>
+                        <td>{{detailData.rating}}
+                            <div class="bg">
+                                    <div class="over" style="width:{{detailData.rating * 12}}px;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr><td>Google Page</td><td><a href="{{detailData.url}}" target="view_window">{{detailData.url}}</a></td></tr>
+                    <tr><td>Website</td><td><a href="{{detailData.website}}" target="view_window">{{detailData.website}}</a></td></tr>
+                    <tr ng-if="detailData.opening_hours != undefined"><td>Hours</td>
+                        <td>{{opening_hours()}} &nbsp &nbsp
+                            <a href="#" data-toggle="modal" data-target="#myModal">
+                                Daily Opening Hours
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+                <div class="modal fade" id="myModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">
+                                    Opening Hours
+                                </h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                    &times;
+                                </button>
+                            </div>
+                            <table class="modal-body table">
+                                <tr ng-repeat="x in detailData.opening_hours.weekday_text">
+                                    <td> {{x.substring(0, x.indexOf(':'))}}</td>
+                                    <td> {{x.substring(x.indexOf(' '), x.length)}}</td>
+                                </tr>
+                            </table>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close
+                                </button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal -->
+                </div>
+            </div>
+            <div class="tab-pane fade" id="photos">
+                <div class="visible-lg card-columns" style="column-count: 4">
+                    <!--采用class="card",考虑一下下-->
+                    <div class="card" ng-repeat="x in detailData.photos">
+                        <a href="{{x.getUrl({'maxWidth': 2000, 'maxHeight': 2000})}}" target="view_window">
+                            <img src="{{x.getUrl({'maxWidth': 350, 'maxHeight': 350})}}" alt="" class="card-img">
+                        </a>
+                    </div>
+                </div>
+                <div class="visible-xs">
+                    <!--采用class="card",考虑一下下-->
+                    <div class="card" ng-repeat="x in detailData.photos">
+                        <a href="{{x.getUrl({'maxWidth': 1000, 'maxHeight': 1000})}}" target="view_window">
+                            <img src="{{x.getUrl({'maxWidth': 800, 'maxHeight': 800})}}" alt="" class="card-img">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="map">
+                <form class="form" role="form" ng-submit="getDirection()">
+                    <div class="form-row">
+                        <div class="form-group col-lg-3">
+                            <label>From</label>
+                            <input type="text" class="form-control" onFocus="geolocate()" ng-model="start_point">
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <label>To</label>
+                            <input type="text" class="form-control" ng-disabled="true" value="{{detailData.formatted_address}}">
+                        </div>
+                        <div class="form-group col-lg-2">
+                            <label>Travel Mode</label>
+                            <select class="form-control" ng-init="traffic=traffic_method[0]" ng-model="traffic">
+                                <option ng-repeat="x in traffic_method" >{{x}}</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-3">
+                            <br>
+                            <button type="submit" class="btn btn-primary">Get Directions</button>
+                        </div>
+                    </div>
+                </form>
+                <button ng-show="showStreet" type="button" class="btn btn-default" ng-click="streetView()">
+                    <img src="Map.png" style="height:40px; width: 40px">
+                </button>
+                <button ng-show="!showStreet" type="button" class="btn btn-default" ng-click="mapView()">
+                    <img src="Pegman.png" style="height:40px; width: 40px">
+                </button>
+                <div id="mmaapp"></div>
+                <div id="panelmap"></div>
+            </div>
+            <div class="tab-pane fade" id="review">
+                <div class="row">
+                    <select class="selectpicker col-lg-3 col-xs-5" data-style="btn btn-secondary btn-sm" ng-model="selectReview"
+                            ng-init="selectReview = 'Google Review'">
+                        <option>Google Review</option>
+                        <option>Yelp Review</option>
+                    </select>
+                    <select class="selectpicker col-lg-3 col-xs-5" data-style="btn btn-secondary btn-sm" ng-model="reviewOrder"
+                            ng-init="reviewOrder='default'">
+                        <option value="default">Default Order</option>
+                        <option value="-rating">Highest Rating</option>
+                        <option value="rating">Lowest Rating</option>
+                        <option value="-time">Most Recent</option>
+                        <option value="time">Least Recent</option>
+                    </select>
+                </div>
+                <br>
+                <div ng-switch="selectReview">
+                    <div ng-switch-when="Yelp Review" class="animationIf">
+                        <div ng-if="reviewYelp.reviews.length == 0" class="alert alert-warning" role="alert">
+                            No Results
+                        </div>
+                        <table ng-if="reviewYelp.reviews.length > 0"class="table">
+                            <tr ng-repeat="x in reviewYelp.reviews|orderBy: reviewOrder">
+                                <td>
+                                    <a href="{{x.url}}" target="">
+                                        <img src="{{x.user.image_url}}" height="30px" width="30px">
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{{x.url}}" class="text-primary" target="view_window"> {{x.user.name}}</a>
+                                    <div class="muted">
+                                        <div class="bg">
+                                            <div class="over" style="width:{{x.rating * 12}}px;"></div>
+                                        </div>
+                                        {{x.time_created}}
+                                    </div>
+                                    {{x.text}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div ng-switch-when="Google Review">
+                        <div ng-if="detailData.reviews == undefined || detailData.reviews.length == 0" class="alert alert-warning"
+                             role="alert">
+                            No Results
+                        </div>
+                        <table ng-if="detailData.reviews.length > 0" class="table">
+                            <tr ng-repeat="x in detailData.reviews|orderBy: reviewOrder">
+                                <td>
+                                    <a href="{{x.author_url}}" target="view_window">
+                                        <img src="{{x.profile_photo_url}}" height="30px" width="30px">
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{{x.author_url}}" class="text-primary" target="view_window"> {{x.author_name}}</a>
+
+                                    <div class="text-muted">
+                                        <div class="bg">
+                                            <div class="over" style="width:{{x.rating * 12}}px;"></div>
+                                        </div>
+                                        {{getTime(x.time)}}
+                                    </div>
+                                    {{x.text}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br><br><br><br>
+    <div class="progress" ng-show="process">
+        <div class="progress-bar progress-bar-striped progress-bar-animated"  style="width: 80%">
+        </div>
+    </div>
+<!--<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwbxXEGW-2J0NVuXXFAu7WfJD01Mfg3QQ">
+</script>-->
+</div>
+</body>
+</html>
