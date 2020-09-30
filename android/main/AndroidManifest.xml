@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <!--显示搜索地点结果-->
-        <activity android:name=".ResultActivity"/>
+        <activity android:name=".ResultActivityfinal"/>
         <activity android:name=".DetailActivity"/>
     </application>
 
