@@ -12,14 +12,7 @@ public class PolylineDecoder {
         return decode(encoded, DEFAULT_PRECISION);
     }
 
-    /**
-     * Precision should be something like 1E5 or 1E6. For OSRM routes found precision was 1E6, not the original default
-     * 1E5.
-     *
-     * @param encoded
-     * @param precision
-     * @return
-     */
+  
     public static List<LatLng> decode(String encoded, double precision) {
         List<LatLng> track = new ArrayList<LatLng>();
         int index = 0;
